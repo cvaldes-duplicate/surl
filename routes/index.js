@@ -19,6 +19,28 @@ function getIp(req)
              return ip;
          }
 
+function logdb(req, url) {
+
+    var db = req.db;
+    var date = Date();
+    var ip = getIp(req);
+    var collection = db.get('logs');
+    collection.insert(
+       {
+           "url": url,
+           "date": date,
+           "ip": ip
+       },
+       function (err, doc) {
+           if (err) {
+               return false;   // no error
+           } else {
+               return true;   // error inserting
+           }
+       });
+}
+
+
 function savedb(req, token, url ) {
 
    var db = req.db;
@@ -83,7 +105,8 @@ collection.find({'token': token},{ 'token': 1, 'url': 1},function(e,docs){
     if (docs[0]) {
       var myurl = docs[0].url;
       var mytoken = docs[0].token;
-      console.log("url1=" + myurl);
+     
+      logdb(req, myurl);
       res.redirect(myurl);
     }
     else {
