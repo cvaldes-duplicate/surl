@@ -1,0 +1,8 @@
+extends layout
+
+block content
+  h1= title
+    form#formAddURL(name="new",method="post",action="/newurl")
+      input#inputToken(type="text", placeholder="token", name="token")
+      input#inputURL(type="text", placeholder="url", name="url" )
+      button#btnSubmit(type="submit") submit

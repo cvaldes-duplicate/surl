@@ -1,0 +1,9 @@
+extends layout
+
+block content
+  h1.
+    Urls
+  ul
+    each tk, i in g
+        li
+          a(href="#{tk.url}")= tk.token

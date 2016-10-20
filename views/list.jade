@@ -1,0 +1,39 @@
+
+extends layout
+
+block content
+    h1= title
+    p Welcome to our test
+
+    // Wrapper
+    #wrapper
+
+        // URL INFO
+        #urlInfo
+            h2 User Info
+            p
+                strong Token:
+                |  <span id='token'></span>
+                br
+                strong date:
+                |  <span id='date'></span>
+                br
+                strong url:
+                |  <span id='url'></span>
+                br
+                strong ip:
+                |  <span id='ip'></span>
+        // /URL INFO
+
+        // URL LIST
+        h2 url List
+        #urlList
+            table
+                thead
+                    th token
+                    th url
+                    th Delete?
+                tbody
+        // /URL LIST
+
+    // /WRAPPER
