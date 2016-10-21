@@ -13,11 +13,14 @@ function randomString(length, chars) {
 }
 
 
-function getIp(req)
-         {
-             var ip= req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-             return ip;
-         }
+function getIp(req)  {
+    var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    //console.log('\n getting addresses')
+    //console.log(req.headers['x-forwarded-for']);
+    //console.log(req.connection.remoteAddress);
+    //console.log(req.ip);
+    return ip;
+}
 
 function logdb(req, url) {
 
