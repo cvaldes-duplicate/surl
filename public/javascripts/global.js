@@ -8,6 +8,9 @@ $(document).ready(function() {
     // Populate the user table on initial page load
     populateTable();
     $('#urlList table tbody').on('click', 'td a.linkshowuser', showurlInfo);
+    // Delete User link click
+    $('#urlList table tbody').on('click', 'td a.linkdeleteuser', deleteurl);
+
 
 });
 
@@ -52,9 +55,50 @@ function showurlInfo(event) {
     var thisObject = urlListData[arrayPosition];
 
     //Populate Info Box
-    $('#date').text(thisObject.ip);
+    $('#date').text(thisObject.date);
     $('#token').text(thisObject.token);
     $('#url').text(thisObject.url);
     $('#ip').text(thisObject.ip);
+
+};
+
+
+// Delete User
+function deleteurl(event) {
+
+    event.preventDefault();
+
+    // Pop up a confirmation dialog
+    var confirmation = confirm('Are you sure you want to delete this url?');
+
+    // Check and make sure the user confirmed
+    if (confirmation === true) {
+
+        // If they did, do our delete
+        $.ajax({
+            type: 'DELETE',
+            url: '/lists/deleteurl/' + $(this).attr('rel')
+        }).done(function (response) {
+
+            // Check for a successful (blank) response
+            if (response.msg === '') {
+            }
+            else {
+                alert('Error: ' + response.msg);
+            }
+
+            // Update the table
+            console.log("refresh table");
+            populateTable();
+
+        });
+
+    }
+    else {
+
+        // If they said no to the confirm, do nothing
+        return false;
+
+    }
 
 };

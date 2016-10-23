@@ -9,20 +9,20 @@ block content
     p
       strong http://qsoc.org/s?url=http://sample.com&t=sample
     p  where url= the url you want to redirect to
-    p   [optional] t= friendly token you want to user
+    p   [optional] t= friendly token you want to use
     p                 if not token is provided, we auto gen a 5 char token
 
-    p  it returns a simple json with the redirection url and an error
+    p  it returns a simple json with the redirection url, the token, and the internal id (save it for maintenanance later) and an error
     p     if there is an error no url is provided
-    p     sample result: {"url":"http://qsoc.org/g/sample","error":""}
+    p     sample result: {"url":"http://qsoc.org/g/sample","token":"sample","id":"580cc8ac7b8147a82adfa01a","error":""} 
 
     p
-      strong to redirect the url
+      strong To redirect the url
     p
       italic   http://qsoc.org/g/sample
-
+	  br
     p
-      strong to list urls
+      strong To list urls
     p      http://qsoc.org/list
 
     p

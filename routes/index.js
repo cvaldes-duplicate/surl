@@ -15,14 +15,10 @@ function randomString(length, chars) {
 
 function getIp(req)  {
     var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-    //console.log('\n getting addresses')
-    //console.log(req.headers['x-forwarded-for']);
-    //console.log(req.connection.remoteAddress);
-    //console.log(req.ip);
     return ip;
 }
 
-function logdb(req, url) {
+function logdb(type, req, url) {
 
     var db = req.db;
     var date = Date();
@@ -30,6 +26,7 @@ function logdb(req, url) {
     var collection = db.get('logs');
     collection.insert(
        {
+           "type": type,
            "url": url,
            "date": date,
            "ip": ip
@@ -44,41 +41,67 @@ function logdb(req, url) {
 }
 
 
-function savedb(req, token, url ) {
-
-   var db = req.db;
-   var date= Date();
-   var ip = getIp(req);
-   var collection = db.get('tokens');
-   collection.insert(
-      {"token" : token,
-       "url" : url,
-       "date" : date,
-       "ip" : ip},
-      function (err, doc) {
-        if (err) {
-          return false;   // no error
-        } else {
-          return true;   // error inserting
-        }
-      });
-}
-
-
 /* Return url */
-function returnURL ( req, token, url) {
+function returnURL ( req, res, auth, token, url) {
   // build url
   var results = {};
-  var newurl = req.protocol + '://' + req.get('host') + '/g/' + token;
-  if (savedb(req,token,url))  {
-      results["error"] = 'cannot insert';
-  } else {
-        results["url"] = newurl;
-        results["error"] = '';
-    }
-  return results;
-}
+  
+  var db = req.db;
 
+  var authcollection = db.get('auth');
+  authcollection.findOne({ '_id': auth }, function (e, docs) {
+      d = docs;
+      console.log(docs);
+      console.log(e);
+      if (docs) {
+          // found
+          var collection = db.get('tokens');
+          var newurl = req.protocol + '://' + req.get('host') + '/g/' + token;
+          collection.findOne({ 'token': token }, function (e, docs) {
+              d = docs;
+              console.log(docs);
+              console.log(e);
+              if (docs) {
+                  results["error"] = 'duplicate token';
+                  res.json(results);
+              } else {
+                  var date = Date();
+                  var ip = getIp(req);
+                  var error = true;
+                  var collection = db.get('tokens');
+                  collection.insert(
+                     {
+                         "token": token,
+                         "url": url,
+                         "date": date,
+                         "ip": ip,
+                         "auth": auth
+                     },
+                      function (err, doc) {
+                          if (err) {
+                              results["error"] = 'cannot insert';
+                              res.json(results);
+                          } else {
+                              console.log(doc);
+                              results["url"] = newurl;
+                              results["token"] = doc.token;
+                              results["id"] = doc._id;
+                              results["error"] = '';
+
+                              logdb("i", req, newurl);
+                              res.json(results);
+                          }
+                      });
+              }
+          });
+
+      } else {
+          // not found
+          results["error"] = 'unathorized';
+          res.json(results);
+      }
+  });
+}
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -89,8 +112,6 @@ router.get('/', function(req, res, next) {
 router.get('/list', function(req, res, next) {
   res.render('list', { title: 'Help' });
 });
-
-
 
 /* GET Hello World page. */
 router.get('/helloworld', function(req, res) {
@@ -109,7 +130,7 @@ collection.find({'token': token},{ 'token': 1, 'url': 1},function(e,docs){
       var myurl = docs[0].url;
       var mytoken = docs[0].token;
      
-      logdb(req, myurl);
+      logdb("g", req, myurl);
       res.redirect(myurl);
     }
     else {
@@ -125,13 +146,16 @@ router.get('/new', function(req,res) {
 
 /* POST add mew url logic (from query string) */
 router.get('/s', function(req, res) {
-   var token= req.query.t;
-   if (!token) {
-      token = randomString(8,'A#');
-   }
-   var url= req.query.url;
-   res.json(returnURL(req,token,url));
+    var token= req.query.t;
+    if (!token) {
+        token = randomString(8,'A#');
+    }
+    var auth = req.query.auth;
+    var url = req.query.url;
+    returnURL(req, res, auth, token, url);
 });
+
+
 /* POST add mew url logic (from form) */
 router.post('/newurl', function(req, res) {
 
@@ -139,8 +163,9 @@ router.post('/newurl', function(req, res) {
    if (!token) {
       token = randomString(5,'A#');
    }
-   var url=req.body.url;
-  res.json(returnURL(req,token,url));
+   var auth = req.body.auth;
+   var url = req.body.url;
+   returnURL(req, res, auth, token, url);
 });
 
 
