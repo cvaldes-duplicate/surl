@@ -48,20 +48,23 @@ function returnURL ( req, res, auth, token, url) {
   
   var db = req.db;
 
+    // check auth parameter
   var authcollection = db.get('auth');
   authcollection.findOne({ '_id': auth }, function (e, docs) {
       d = docs;
       console.log(docs);
       console.log(e);
       if (docs) {
-          // found
+          // found auth 
           var collection = db.get('tokens');
           var newurl = req.protocol + '://' + req.get('host') + '/g/' + token;
+          // make sure the token does not exists
           collection.findOne({ 'token': token }, function (e, docs) {
               d = docs;
               console.log(docs);
               console.log(e);
               if (docs) {
+                  // token found. should not insert it
                   results["error"] = 'duplicate token';
                   res.json(results);
               } else {
@@ -96,7 +99,7 @@ function returnURL ( req, res, auth, token, url) {
           });
 
       } else {
-          // not found
+          // not auth record found
           results["error"] = 'unathorized';
           res.json(results);
       }

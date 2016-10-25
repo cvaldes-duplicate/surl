@@ -3,15 +3,16 @@
 var urlListData = [];
 
 // DOM Ready =============================================================
-$(document).ready(function() {
+$(document).ready(function () {
 
-    // Populate the user table on initial page load
-    populateTable();
-    $('#urlList table tbody').on('click', 'td a.linkshowuser', showurlInfo);
-    // Delete User link click
-    $('#urlList table tbody').on('click', 'td a.linkdeleteuser', deleteurl);
+    if (window.location.pathname == '/list') {
+        // Populate the user table on initial page load
+        populateTable();
+        $('#urlList table tbody').on('click', 'td a.linkshowuser', showurlInfo);
+        // Delete User link click
+        $('#urlList table tbody').on('click', 'td a.linkdeleteuser', deleteurl);
 
-
+    }
 });
 
 // Functions =============================================================
